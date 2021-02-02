@@ -1,5 +1,7 @@
 # ParkingNotifier
 !!Database implementation coming shortly. Currently stores/reads arrays from .txt files.
+
+
 This is a simple app I developed to notify on winter parking bans in Ottawa, ON.
 Uses Twilio APIs and libraries to send/recieve and read text messages, and beautifulsoup libraries
 to read the actual website tags.
