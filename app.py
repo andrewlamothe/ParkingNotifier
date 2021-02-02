@@ -5,16 +5,16 @@ from multiprocessing import Process
 from sms_info import text_numbers, from_num
 app = Flask(__name__)
 
-# ForCLASS
-##NOTE: THIS WILL NOT RUN. Passwords and tokens for twilio authorization are stored and read from local files only
-#Flask server starts listeing on port 5000
+# NOTE: THIS WILL NOT RUN. Passwords and tokens for twilio authorization are stored and read from local files only
+# Flask server starts listeing on port 5000
 # a local tunneler will bring any post requests from
 # twilio API's to this running process
 
 @app.route('/sms', methods=['POST'])  # when the server recieves a POST request from /sms url
 def sms():
-    people = open('texts/subscribers.txt').readlines()  # where the current list of registered numbers are
-      # each line is fed into an array 'people'
+    people = open('texts/subscribers.txt').readlines()
+    # where the current list of registered numbers are
+    # each line is fed into an array 'people'
     print("Current list of numbers registered:\n",people,"\n")
     number = request.form['From']       # set variable 'number' to the number currently texting
     message_body = request.form['Body']  # set the variable ' message_body to the content of the text message
@@ -32,7 +32,7 @@ def sms():
             break
     if not match:
         if message_body.lower() != "yes":
-            text_numbers(number, from_num, "Reply with 'Yes' (no quotes) to recieve automatic winter parking ban updates. 'No' Will unsubscribe. 'Status' for current status (Created by Andrew)")
+            text_numbers(number, from_num, "Reply with 'Yes' (no quotes) to recieve automatic winter parking ban updates. 'No' Will unsubscribe. 'Status' for current ban status (Created by AndrewL)")
         if message_body.lower() == "yes":
             text_numbers(number, from_num, "Subscribed! You will be notified when parking on the street is banned in Ottawa. reply with 'NO' to unsub")
             text_numbers(number, from_num, "Current status: " + parking.get_page_data())

@@ -10,4 +10,4 @@ def parking_loop():
         counter += 1
         print(str(counter) + " times looped. Time: ", datetime.now())
         counter += 1
-        sleep(1800) #Loops every 30 minutes
+        sleep(1800)  # Loops every 30 minutes
