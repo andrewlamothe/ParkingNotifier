@@ -1,6 +1,9 @@
 import requests
 from bs4 import BeautifulSoup
 from sms_info import text_numbers, from_num
+from pymongo import MongoClient
+
+mongoClient = MongoClient()
 
 
 def get_page_data():
@@ -24,9 +27,7 @@ def check_page_change():  # checks the website for a change
 
 
 def send_parking_text(message):
-    subs = open('texts/subscribers.txt')  # This will be where the database accesses the list for phone numbers
-    numbers = subs.readlines()
-    subs.close()
+    numbers = list(map(lambda o : o['phonenumber'], list(mongoClient.ParkingNotifier.subscribers.find({}))))
     print(numbers)
     for each in numbers:  # if sending text fails (i.e. 0 balance in Twilio), this is so the whole app doesn't crash
         try:

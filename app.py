@@ -3,7 +3,10 @@ import parking
 import loop
 from multiprocessing import Process
 from sms_info import text_numbers, from_num
+from pymongo import MongoClient
 app = Flask(__name__)
+
+mongoClient = MongoClient()
 
 # NOTE: THIS WILL NOT RUN. Passwords and tokens for twilio authorization are stored and read from local files only
 # Flask server starts listeing on port 5000
@@ -12,9 +15,8 @@ app = Flask(__name__)
 
 @app.route('/sms', methods=['POST'])  # when the server recieves a POST request from /sms url
 def sms():
-    people = open('texts/subscribers.txt').readlines()
-    # where the current list of registered numbers are
-    # each line is fed into an array 'people'
+    # load subscriber phone numbers from MongoDB
+    people = list(map(lambda o : o['phonenumber'], list(mongoClient.ParkingNotifier.subscribers.find({}))))
     print("Current list of numbers registered:\n",people,"\n")
     number = request.form['From']       # set variable 'number' to the number currently texting
     message_body = request.form['Body']  # set the variable ' message_body to the content of the text message
@@ -37,22 +39,19 @@ def sms():
             text_numbers(number, from_num, "Subscribed! You will be notified when parking on the street is banned in Ottawa. reply with 'NO' to unsub")
             text_numbers(number, from_num, "Current status: " + parking.get_page_data())
             people.append('\n'+number)
+            mongoClient.ParkingNotifier.subscribers.insert_one({'phonenumber': number})
             print(str(number) + " appended to index " + str(len(people)))
     if match:
         if message_body.lower() == 'no':
             text_numbers(number, from_num, "Successfully unsubscribed")
+            mongoClient.ParkingNotifier.subscribers.delete_one({'phonenumber': people[match_index]})
             people.pop(match_index)
         if message_body.lower() == 'status':
             text_numbers(number, from_num, "Current status: " + parking.get_page_data())
         elif message_body.lower() != 'no':
             text_numbers(number, from_num, "You are already subscribed for updates for Ottawa parking. reply 'No' to unsubscribe, or 'statuts' for current parking status")
             print("Already subscribed at", match_index, " index")
-    end = open('subscribers.txt', 'w')
-    for lines in people:
-        if lines != '\n':
-            end.write(lines)
 
-    end.close()
     return 'All good'
 
 
